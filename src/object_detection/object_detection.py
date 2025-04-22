@@ -4,6 +4,7 @@ import numpy as np
 from io import BytesIO
 from fastapi.responses import Response
 from fastapi import FastAPI
+import time
 
 from ray import serve
 from ray.serve.handle import DeploymentHandle
@@ -25,6 +26,7 @@ class APIIngress:
     )
     async def detect(self, image_url: str):
         image = await self.handle.detect.remote(image_url)
+
         file_stream = BytesIO()
         image.save(file_stream, "jpeg")
         return Response(content=file_stream.getvalue(), media_type="image/jpeg")
