@@ -4,8 +4,6 @@ import numpy as np
 from io import BytesIO
 from fastapi.responses import Response
 from fastapi import FastAPI
-import time
-
 from ray import serve
 from ray.serve.handle import DeploymentHandle
 
@@ -24,7 +22,8 @@ class APIIngress:
         responses={200: {"content": {"image/jpeg": {}}}},
         response_class=Response,
     )
-    async def detect(self, image_url: str):
+    async def detect(self):
+        image_url = "https://ultralytics.com/images/zidane.jpg"
         image = await self.handle.detect.remote(image_url)
 
         file_stream = BytesIO()
@@ -34,8 +33,11 @@ class APIIngress:
 
 @serve.deployment(
     ray_actor_options={"num_cpus": 1},
-    autoscaling_config={"min_replicas": 1, "max_replicas": 2},
+    #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
+    num_replicas=2,
 )
+# num of cpu cores used = num_cpus * num_replicas
+
 class ObjectDetection:
     def __init__(self):
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")

@@ -2,8 +2,7 @@ import requests
 import time
 
 # Sample image URL for testing
-image_url = "https://people.com/thmb/oni3ZYC5MJBRdc_dI65sgjnex0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(999x0:1001x2)/dog-hug-2f174202e9cf4b36bc6c81b196a6d7bd.jpg"
-
+image_url = "https://ultralytics.com/images/zidane.jpg"
 
 
 def write_to_file(image_url: str):
