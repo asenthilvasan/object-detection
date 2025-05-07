@@ -2,3 +2,4 @@
 .idea
 .env
 weights
+yolov5s.pt
