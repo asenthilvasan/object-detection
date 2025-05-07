@@ -8,7 +8,7 @@ from ray import serve
 from ray.serve.handle import DeploymentHandle
 from RealESRGAN import RealESRGAN
 import requests
-
+import os
 app = FastAPI()
 
 
@@ -62,10 +62,16 @@ class PreprocessImage:
 )
 class ObjectDetection:
     def __init__(self):
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
-        #self.model.cuda()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(device)
+
+        # Force YOLOv5 to skip CUDA device detection internally
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0" if torch.cuda.is_available() else ""
+
+        # Load YOLOv5 model
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", force_reload=True)
+
+        # Move it to proper device manually
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
 
     async def detect(self, image: Image.Image):
         result_im = self.model(image)
