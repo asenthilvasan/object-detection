@@ -20,19 +20,31 @@ class APIIngress:
         self.enhancer_handle = image_enhancer_handle
 
     @app.get(
-        "/detect",
+        "/detect_and_enhance",
         responses={200: {"content": {"image/jpeg": {}}}},
         response_class=Response,
     )
     async def detect(self):
         image_url = "https://raw.githubusercontent.com/ai-forever/Real-ESRGAN/main/inputs/lr_lion.png"
         enhanced_image = await self.enhancer_handle.enhance.remote(image_url)
-        image = await self.handle.detect.remote(enhanced_image)
+        image = await self.handle.detect_after_enhance.remote(enhanced_image)
 
         file_stream = BytesIO()
         image.save(file_stream, "jpeg")
         return Response(content=file_stream.getvalue(), media_type="image/jpeg")
 
+    @app.get(
+        "/detect",
+        responses={200: {"content": {"image/jpeg": {}}}},
+        response_class=Response,
+    )
+    async def detect(self):
+
+        image_url = "https://raw.githubusercontent.com/ai-forever/Real-ESRGAN/main/inputs/lr_lion.png"
+        image = await self.handle.detect.remote(image_url)
+        file_stream = BytesIO()
+        image.save(file_stream, "jpeg")
+        return Response(content=file_stream.getvalue(), media_type="image/jpeg")
 
 
 
@@ -49,7 +61,7 @@ class PreprocessImage:
         self.model = RealESRGAN(device, scale=4)
         self.model.load_weights('weights/RealESRGAN_x4.pth', download=True)
 
-    async def enhance(self, image_url: str):
+    def enhance(self, image_url: str):
         image = Image.open(requests.get(image_url, stream=True).raw)
         sr_image = self.model.predict(image)
         return sr_image
@@ -73,8 +85,12 @@ class ObjectDetection:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
 
-    async def detect(self, image: Image.Image):
+    def detect_after_enhance(self, image: Image.Image):
         result_im = self.model(image)
+        return Image.fromarray(result_im.render()[0].astype(np.uint8))
+
+    def detect(self, image_url: str):
+        result_im = self.model(image_url)
         return Image.fromarray(result_im.render()[0].astype(np.uint8))
 
 entrypoint = APIIngress.bind(ObjectDetection.bind(), PreprocessImage.bind())
