@@ -9,9 +9,8 @@ from fastapi import FastAPI
 from ray import serve
 from ray.serve.handle import DeploymentHandle
 
-# Initialize Ray with dashboard enabled
-# Dashboard available at http://localhost:8265
-ray.init(dashboard_host="0.0.0.0", ignore_reinit_error=True)
+# Ray initialization is handled by run_serve.py in Docker
+# or automatically by serve run locally
 
 app = FastAPI()
 
