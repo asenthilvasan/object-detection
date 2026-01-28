@@ -16,7 +16,6 @@ dependencies = [
     "opencv-python-headless (>=4.11.0.86,<5.0.0.0)",
     "pandas (>=2.2.3,<3.0.0)",
     "gitpython (>=3.1.30)",
-    "realesrgan @ git+https://github.com/sberbank-ai/Real-ESRGAN.git",
 ]
 
 [tool.poetry]
@@ -25,4 +24,4 @@ packages = [{include = "object_detection", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry.core.masonry.api" 
