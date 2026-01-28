@@ -1,4 +1,4 @@
-# Dockerfile for Ray Serve Object Detection Service
+# Dockerfile for Ray Serve Object Detection Service (GPU-enabled)
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install CPU-only PyTorch first (smaller, no NVIDIA packages)
+# Install PyTorch with CUDA support
 RUN pip install --no-cache-dir \
-    torch torchvision --index-url https://download.pytorch.org/whl/cpu
+    torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-# Install all other dependencies directly with pip (skip poetry to avoid duplicates)
+# Install all other dependencies
 RUN pip install --no-cache-dir \
     "ray[serve]>=2.44.1" \
     ultralytics \
