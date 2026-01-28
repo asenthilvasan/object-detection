@@ -1,6 +1,7 @@
 .venv
 .idea
 .env
+.DS_Store
 yolov5s.pt
 __pycache__/
 prometheus-3.9.1.darwin-arm64
