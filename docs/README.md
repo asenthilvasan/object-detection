@@ -11,7 +11,7 @@ brew install int128/kubelogin/kubelogin
 Download config file from nrp.ai documentation
 
 ```bash
-#to force authentication
+#to force authentication will bring up browser and you login 
 kubectl auth whoami 
 
 mkdir -p ~/.kube
@@ -40,7 +40,7 @@ kubectl port-forward -n ml-pipelines svc/object-detection 8000:8000
 kubectl delete -f k8s/deployment.yaml
 
 # Check all resources
-kubectl get all -n ml-pipelines
+kubectl get pods -n ml-pipelines
 ```
 ## Structure
 
@@ -50,13 +50,13 @@ kubectl get all -n ml-pipelines
 - `run_serve.py` → Custom startup script for Docker containers
 - `src/object_detection/object_detection.py` → Ray Serve application with YOLOv5
 
-## Code Changes from Original Branch
+## Code Changes from Main Branch
 
-### Why `run_serve.py` exists
+###`run_serve.py` exists because
 
 The original code used `serve run src.object_detection.object_detection:entrypoint` to start the server. This works on local but fails in Docker containers because Ray Serve binds to `127.0.0.1` (localhost) by default.
 
-`run_serve.py` fixes this with:
+Moving the initialization to `run_serve.py` worked:
 ```python
 ray.init(dashboard_host="0.0.0.0", ignore_reinit_error=True)
 serve.start(http_options={"host": "0.0.0.0", "port": 8000})
