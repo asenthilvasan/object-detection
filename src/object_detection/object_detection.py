@@ -47,8 +47,8 @@ class APIIngress:
 
 @serve.deployment(
     ray_actor_options={"num_cpus": 1, "num_gpus": 1},
-    health_check_period_s=300,
-    health_check_timeout_s=60,
+    health_check_period_s=60,
+    health_check_timeout_s=30,
     #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
 )
 class ObjectDetection:

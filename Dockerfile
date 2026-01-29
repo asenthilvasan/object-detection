@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir \
     torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-# Install all other dependencies
+# Install all  dependencies
 RUN pip install --no-cache-dir \
     "ray[serve]>=2.44.1" \
     ultralytics \

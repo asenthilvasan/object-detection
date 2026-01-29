@@ -2,13 +2,13 @@ import requests
 import time
 from pathlib import Path
 
-# Sample image URL for testing
+# Sample image URL for testin
 image_url = "https://ultralytics.com/images/zidane.jpg"
 local_image_path = Path(__file__).parent / "test_image.jpg"
 
 
 def download_test_image():
-    """Download test image once for upload benchmarks"""
+    #download image once
     if not local_image_path.exists():
         print("Downloading test image...")
         resp = requests.get(image_url)
@@ -18,8 +18,8 @@ def download_test_image():
 
 
 def benchmark_url(n=10):
-    """Benchmark using URL endpoint (server fetches image)"""
-    print(f"\n--- URL Endpoint Benchmark (n={n}) ---")
+    #Benchmark for fetching image every time
+    print(f"\nURL Endpoint Benchmark (n={n})")
     times = []
     for i in range(n):
         start = time.time()
@@ -31,17 +31,17 @@ def benchmark_url(n=10):
     return times
 
 
-def benchmark_upload(n):
-    """Benchmark using upload endpoint (client sends image bytes)"""
-    print(f"\n--- Upload Endpoint Benchmark (n={n}) ---")
+def benchmark_upload(n=10):
+    #Benchmark for just uploading the imaga data and fetching once
+    print(f"\nUpload Endpoint Benchmark (n={n})")
     image_path = download_test_image()
     image_bytes = image_path.read_bytes()
     
-    # Use session to reuse TCP connection (avoid connection setup overhead)
+    # Use session to reuse TCP connection 
     session = requests.Session()
     
     times = []
-    for i in range(n):
+    for i in range(n=10):
         start = time.time()
         resp = session.post(
             "http://127.0.0.1:8000/detect-upload",
