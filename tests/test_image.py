@@ -31,16 +31,19 @@ def benchmark_url(n=10):
     return times
 
 
-def benchmark_upload(n=10):
+def benchmark_upload(n):
     """Benchmark using upload endpoint (client sends image bytes)"""
     print(f"\n--- Upload Endpoint Benchmark (n={n}) ---")
     image_path = download_test_image()
     image_bytes = image_path.read_bytes()
     
+    # Use session to reuse TCP connection (avoid connection setup overhead)
+    session = requests.Session()
+    
     times = []
     for i in range(n):
         start = time.time()
-        resp = requests.post(
+        resp = session.post(
             "http://127.0.0.1:8000/detect-upload",
             files={"file": ("image.jpg", image_bytes, "image/jpeg")}
         )
@@ -48,9 +51,10 @@ def benchmark_upload(n=10):
         times.append(elapsed)
         print(f"[{i+1}/{n}] {elapsed:.3f}s")
     print(f"Avg: {sum(times)/n:.3f}s | Min: {min(times):.3f}s | Max: {max(times):.3f}s")
+    
+    session.close()
     return times
 
 
 if __name__ == "__main__":
-    # Run upload benchmark (faster, measures actual inference)
-    benchmark_upload(10)
+    benchmark_upload(50)
