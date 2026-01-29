@@ -1,26 +1,56 @@
 import requests
 import time
+from pathlib import Path
 
 # Sample image URL for testing
 image_url = "https://ultralytics.com/images/zidane.jpg"
+local_image_path = Path(__file__).parent / "test_image.jpg"
 
 
-def write_to_file(image_url: str):
-    # Send request to the object detection services
-    resp = requests.get(f"http://127.0.0.1:8000/detect?image_url={image_url}")
+def download_test_image():
+    """Download test image once for upload benchmarks"""
+    if not local_image_path.exists():
+        print("Downloading test image...")
+        resp = requests.get(image_url)
+        local_image_path.write_bytes(resp.content)
+        print(f"Saved to {local_image_path}")
+    return local_image_path
 
-    # Save the annotated image with detected objects
-    with open("output.jpeg", 'wb') as f:
-        f.write(resp.content)
 
-def benchmark(n=10):
+def benchmark_url(n=10):
+    """Benchmark using URL endpoint (server fetches image)"""
+    print(f"\n--- URL Endpoint Benchmark (n={n}) ---")
     times = []
-    for _ in range(n):
+    for i in range(n):
         start = time.time()
         resp = requests.get(f"http://127.0.0.1:8000/detect?image_url={image_url}")
         elapsed = time.time() - start
         times.append(elapsed)
-        print(f"Request took {elapsed:.3f}s")
-    print(f"\nAvg: {sum(times)/n:.3f}s | Min: {min(times):.3f}s | Max: {max(times):.3f}s")
+        print(f"[{i+1}/{n}] {elapsed:.3f}s")
+    print(f"Avg: {sum(times)/n:.3f}s | Min: {min(times):.3f}s | Max: {max(times):.3f}s")
+    return times
 
-benchmark(50)
+
+def benchmark_upload(n=10):
+    """Benchmark using upload endpoint (client sends image bytes)"""
+    print(f"\n--- Upload Endpoint Benchmark (n={n}) ---")
+    image_path = download_test_image()
+    image_bytes = image_path.read_bytes()
+    
+    times = []
+    for i in range(n):
+        start = time.time()
+        resp = requests.post(
+            "http://127.0.0.1:8000/detect-upload",
+            files={"file": ("image.jpg", image_bytes, "image/jpeg")}
+        )
+        elapsed = time.time() - start
+        times.append(elapsed)
+        print(f"[{i+1}/{n}] {elapsed:.3f}s")
+    print(f"Avg: {sum(times)/n:.3f}s | Min: {min(times):.3f}s | Max: {max(times):.3f}s")
+    return times
+
+
+if __name__ == "__main__":
+    # Run upload benchmark (faster, measures actual inference)
+    benchmark_upload(10)

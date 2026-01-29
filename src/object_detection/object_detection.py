@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 from io import BytesIO
 from fastapi.responses import Response
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 
 from ray import serve
 from ray.serve.handle import DeploymentHandle
@@ -32,9 +32,21 @@ class APIIngress:
         image.save(file_stream, "jpeg")
         return Response(content=file_stream.getvalue(), media_type="image/jpeg")
 
+    @app.post(
+        "/detect-upload",
+        responses={200: {"content": {"image/jpeg": {}}}},
+        response_class=Response,
+    )
+    async def detect_upload(self, file: UploadFile = File(...)):
+        image_bytes = await file.read()
+        image = await self.handle.detect_bytes.remote(image_bytes)
+        file_stream = BytesIO()
+        image.save(file_stream, "jpeg")
+        return Response(content=file_stream.getvalue(), media_type="image/jpeg")
+
 
 @serve.deployment(
-    ray_actor_options={"num_cpus": 1},
+    ray_actor_options={"num_cpus": 1, "num_gpus": 1},
     #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
 )
 class ObjectDetection:
@@ -46,6 +58,12 @@ class ObjectDetection:
 
     def detect(self, image_url: str):
         result_im = self.model(image_url)
+        return Image.fromarray(result_im.render()[0].astype(np.uint8))
+
+    def detect_bytes(self, image_bytes: bytes):
+        # Load image from bytes
+        image = Image.open(BytesIO(image_bytes))
+        result_im = self.model(image)
         return Image.fromarray(result_im.render()[0].astype(np.uint8))
 
 

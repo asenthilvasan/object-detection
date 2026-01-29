@@ -26,7 +26,8 @@ RUN pip install --no-cache-dir \
     opencv-python-headless \
     pandas \
     gitpython \
-    requests
+    requests \
+    python-multipart
 
 # Copy application code
 COPY src/ ./src/
