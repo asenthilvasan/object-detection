@@ -41,7 +41,7 @@ def benchmark_upload(n=10):
     session = requests.Session()
     
     times = []
-    for i in range(n=10):
+    for i in range(n):
         start = time.time()
         resp = session.post(
             "http://127.0.0.1:8000/detect-upload",
