@@ -56,5 +56,53 @@ def benchmark_upload(n=10):
     return times
 
 
+def run_rps(duration_s=30, rps=5.0, use_upload=True, warmup=5):
+    # Simple fixed-rate loop to target consistent request rate.
+    interval = 1.0 / rps
+    times = []
+
+    if use_upload:
+        image_path = download_test_image()
+        image_bytes = image_path.read_bytes()
+        session = requests.Session()
+        def do_request():
+            return session.post(
+                "http://127.0.0.1:8000/detect-upload",
+                files={"file": ("image.jpg", image_bytes, "image/jpeg")}
+            )
+    else:
+        session = requests.Session()
+        def do_request():
+            return session.get(f"http://127.0.0.1:8000/detect?image_url={image_url}")
+
+    # Warmup
+    for _ in range(warmup):
+        do_request()
+
+    start_wall = time.perf_counter()
+    next_tick = start_wall
+    count = 0
+    while True:
+        now = time.perf_counter()
+        if now >= start_wall + duration_s:
+            break
+        if now < next_tick:
+            time.sleep(next_tick - now)
+        req_start = time.perf_counter()
+        do_request() 
+        elapsed = time.perf_counter() - req_start
+        times.append(elapsed)
+        count += 1
+        next_tick += interval
+
+    session.close()
+
+    if times:
+        achieved_rps = count / duration_s
+        print(f"\nRPS run: target={rps:.2f}, achieved={achieved_rps:.2f}, requests={count}")
+        print(f"Avg: {sum(times)/len(times):.3f}s | Min: {min(times):.3f}s | Max: {max(times):.3f}s")
+    return times
+
+
 if __name__ == "__main__":
-    benchmark_upload(50)
+    run_rps(duration_s=30, rps=5.0, use_upload=True, warmup=5)

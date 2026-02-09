@@ -15,6 +15,8 @@ spec:
       labels:
         app: object-detection
     spec:
+      nodeSelector:
+        nvidia.com/gpu.product: NVIDIA-L40
       containers:
       - name: object-detection
         image: alexanderlio/object-detection:latest
