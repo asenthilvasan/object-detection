@@ -60,21 +60,26 @@ class ObjectDetection:
         self.model.to(self.device)
         self.loop = asyncio.get_running_loop()
 
-    def _detect_impl(self, image_url: str):
-        result_im = self.model(image_url)
-        return Image.fromarray(result_im.render()[0].astype(np.uint8))
+    
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
+    async def detect(self, image_urls: list[str]):
+        return await self.loop.run_in_executor(None, self._detect_batch_impl, image_urls)
 
-    async def detect(self, image_url: str):
-        return await self.loop.run_in_executor(None, self._detect_impl, image_url)
+    def _detect_batch_impl(self, image_urls: list[str]):
+        # Run inference on batch of URLs
+        results = self.model(image_urls)
+        # Render returns a list of arrays
+        return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
 
-    def _detect_bytes_impl(self, image_bytes: bytes):
-        # Load image from bytes
-        image = Image.open(BytesIO(image_bytes))
-        result_im = self.model(image)
-        return Image.fromarray(result_im.render()[0].astype(np.uint8))
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
+    async def detect_bytes(self, image_bytes_list: list[bytes]):
+        return await self.loop.run_in_executor(None, self._detect_bytes_batch_impl, image_bytes_list)
 
-    async def detect_bytes(self, image_bytes: bytes):
-        return await self.loop.run_in_executor(None, self._detect_bytes_impl, image_bytes)
+    def _detect_bytes_batch_impl(self, image_bytes_list: list[bytes]):
+        # Load images from bytes
+        images = [Image.open(BytesIO(b)) for b in image_bytes_list]
+        results = self.model(images)
+        return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
 
 
 entrypoint = APIIngress.bind(ObjectDetection.bind())
