@@ -1,5 +1,6 @@
 import ray
 import torch
+import asyncio
 from PIL import Image
 import numpy as np
 from io import BytesIO
@@ -57,16 +58,23 @@ class ObjectDetection:
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
+        self.loop = asyncio.get_running_loop()
 
-    def detect(self, image_url: str):
+    def _detect_impl(self, image_url: str):
         result_im = self.model(image_url)
         return Image.fromarray(result_im.render()[0].astype(np.uint8))
 
-    def detect_bytes(self, image_bytes: bytes):
+    async def detect(self, image_url: str):
+        return await self.loop.run_in_executor(None, self._detect_impl, image_url)
+
+    def _detect_bytes_impl(self, image_bytes: bytes):
         # Load image from bytes
         image = Image.open(BytesIO(image_bytes))
         result_im = self.model(image)
         return Image.fromarray(result_im.render()[0].astype(np.uint8))
+
+    async def detect_bytes(self, image_bytes: bytes):
+        return await self.loop.run_in_executor(None, self._detect_bytes_impl, image_bytes)
 
 
 entrypoint = APIIngress.bind(ObjectDetection.bind())

@@ -17,6 +17,10 @@ spec:
     spec:
       nodeSelector:
         nvidia.com/gpu.product: NVIDIA-L40
+      tolerations:
+      - key: "nautilus.io/issue"
+        operator: "Exists"
+        effect: "NoSchedule"
       containers:
       - name: object-detection
         image: alexanderlio/object-detection:latest
