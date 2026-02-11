@@ -16,7 +16,7 @@ from ray.serve.handle import DeploymentHandle
 app = FastAPI()
 
 
-@serve.deployment(num_replicas=1)
+@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1, "max_concurrency": 1000})
 @serve.ingress(app)
 class APIIngress:
     def __init__(self, object_detection_handle: DeploymentHandle):
@@ -47,7 +47,7 @@ class APIIngress:
 
 
 @serve.deployment(
-    ray_actor_options={"num_cpus": 1, "num_gpus": 1},
+    ray_actor_options={"num_cpus": 1, "num_gpus": 1, "max_concurrency": 1000},
     health_check_period_s=60,
     health_check_timeout_s=30,
     #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
@@ -61,7 +61,8 @@ class ObjectDetection:
         self.loop = asyncio.get_running_loop()
 
     
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5)
+    
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
     async def detect(self, image_urls: list[str]):
         return await self.loop.run_in_executor(None, self._detect_batch_impl, image_urls)
 
@@ -72,7 +73,7 @@ class ObjectDetection:
         # Render returns a list of arrays
         return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
 
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5)
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
     async def detect_bytes(self, image_bytes_list: list[bytes]):
         return await self.loop.run_in_executor(None, self._detect_bytes_batch_impl, image_bytes_list)
 
