@@ -47,10 +47,10 @@ metadata:
   namespace: ml-pipelines
 data:
   # Official Ray-provided Grafana dashboard JSON files (Ray 2.x)
-  serve_deployment_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/serve_deployment_grafana_dashboard.json"
-  serve_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/serve_grafana_dashboard.json"
-  default_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/default_grafana_dashboard.json"
-  data_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/data_grafana_dashboard.json"
+  serve_deployment_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/serve_deployment_grafana_dashboard.json"
+  serve_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/serve_grafana_dashboard.json"
+  default_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/default_grafana_dashboard.json"
+  data_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/data_grafana_dashboard.json"
 
 ---
 # PersistentVolumeClaim for Grafana state (plugins, DB)
@@ -84,17 +84,21 @@ spec:
       labels:
         app: grafana
     spec:
+      securityContext:
+        fsGroup: 472
       initContainers:
       # Download the official Ray Grafana dashboard JSON files before Grafana starts
       - name: download-ray-dashboards
         image: curlimages/curl:8.7.1
+        securityContext:
+          runAsUser: 472
         command:
           - sh
           - -c
           - |
             set -e
             DEST=/dashboards
-            BASE="https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards"
+            BASE="https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana"
             for name in \
               serve_deployment_grafana_dashboard.json \
               serve_grafana_dashboard.json \

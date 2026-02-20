@@ -1,6 +1,6 @@
 ---
 # ConfigMap: k6 load test script
-# Sends POST /detect-upload requests with a small test JPEG fetched once at startup.
+# Sends POST /detect-upload requests with a test JPEG pre-downloaded by an init container.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,7 +11,6 @@ data:
     import http from "k6/http";
     import { check } from "k6";
     import { Trend, Rate, Counter } from "k6/metrics";
-
     // ---------------------------------------------------------------------------
     // Custom metrics
     // ---------------------------------------------------------------------------
@@ -34,10 +33,12 @@ data:
           preAllocatedVUs: 50,       // VUs pre-warmed (increase if k6 warns)
           maxVUs: 100,               // absolute VU ceiling
           stages: [
-            { duration: "30s", target: 2  },  // ramp 0 → 2 RPS
-            { duration: "2m",  target: 2  },  // hold  2 RPS
-            { duration: "30s", target: 8  },  // ramp 2 → 8 RPS
-            { duration: "2m",  target: 8  },  // hold  8 RPS
+            { duration: "30s", target: 10 },  // ramp 0 → 10 RPS
+            { duration: "2m",  target: 10 },  // hold  10 RPS
+            { duration: "30s", target: 40 },  // ramp 10 → 40 RPS
+            { duration: "2m",  target: 40 },  // hold  40 RPS
+            { duration: "30s", target: 80 },  // ramp 40 → 80 RPS
+            { duration: "2m",  target: 80 },  // hold  80 RPS
             { duration: "30s", target: 0  },  // ramp down
           ],
         },
@@ -51,17 +52,9 @@ data:
     };
 
     // ---------------------------------------------------------------------------
-    // Setup: download the test image once and share it across all VUs
+    // Load the test image from disk (pre-downloaded by init container)
     // ---------------------------------------------------------------------------
-    export function setup() {
-      const imageUrl =
-        "https://ultralytics.com/images/bus.jpg";
-      const res = http.get(imageUrl, { responseType: "binary" });
-      if (res.status !== 200) {
-        throw new Error(`Failed to download test image: ${res.status}`);
-      }
-      return { imageBytes: res.body };
-    }
+    const imageBytes = open("/data/test_image.jpg", "b");
 
     // ---------------------------------------------------------------------------
     // Default function: each VU iteration sends one /detect-upload request.
@@ -71,9 +64,9 @@ data:
       __ENV.OD_BASE_URL ||
       "http://object-detection.ml-pipelines.svc.cluster.local:8000";
 
-    export default function (data) {
+    export default function () {
       const payload = {
-        file: http.file(data.imageBytes, "test.jpg", "image/jpeg"),
+        file: http.file(imageBytes, "test.jpg", "image/jpeg"),
       };
 
       const start = Date.now();
@@ -116,6 +109,14 @@ spec:
       # Replace the hostname value or remove this block to let k8s schedule freely.
       # nodeSelector:
       #   kubernetes.io/hostname: rci-tide-gpu-01.sdsu.edu
+      initContainers:
+      - name: download-image
+        image: curlimages/curl:8.5.0
+        command: ["curl", "-fsSL", "-o", "/data/test_image.jpg",
+                  "https://ultralytics.com/images/bus.jpg"]
+        volumeMounts:
+        - name: test-data
+          mountPath: /data
       containers:
       - name: k6
         image: grafana/k6:0.51.0
@@ -130,14 +131,19 @@ spec:
         volumeMounts:
         - name: scripts
           mountPath: /scripts
+        - name: test-data
+          mountPath: /data
+          readOnly: true
         resources:
           requests:
             memory: "256Mi"
             cpu: "500m"
           limits:
             memory: "512Mi"
-            cpu: "1"
+            cpu: "1000m"
       volumes:
       - name: scripts
         configMap:
           name: k6-script
+      - name: test-data
+        emptyDir: {}
