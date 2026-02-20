@@ -1,0 +1,143 @@
+---
+# ConfigMap: k6 load test script
+# Sends POST /detect-upload requests with a small test JPEG fetched once at startup.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-script
+  namespace: ml-pipelines
+data:
+  load_test.js: |
+    import http from "k6/http";
+    import { check } from "k6";
+    import { Trend, Rate, Counter } from "k6/metrics";
+
+    // ---------------------------------------------------------------------------
+    // Custom metrics
+    // ---------------------------------------------------------------------------
+    const inferenceLatency = new Trend("inference_latency_ms", true);
+    const errorRate        = new Rate("error_rate");
+    const requestCount     = new Counter("total_requests");
+
+    // ---------------------------------------------------------------------------
+    // Test configuration – requests per second via ramping-arrival-rate.
+    // preAllocatedVUs: VUs kept warm to handle the target RPS.
+    // maxVUs: hard cap; k6 warns if it needs more than preAllocatedVUs.
+    // Rule of thumb: preAllocatedVUs ≈ target_rps × p99_latency_seconds
+    // ---------------------------------------------------------------------------
+    export const options = {
+      scenarios: {
+        rps_ramp: {
+          executor: "ramping-arrival-rate",
+          startRate: 0,              // RPS at test start
+          timeUnit: "1s",            // rate unit
+          preAllocatedVUs: 50,       // VUs pre-warmed (increase if k6 warns)
+          maxVUs: 100,               // absolute VU ceiling
+          stages: [
+            { duration: "30s", target: 2  },  // ramp 0 → 2 RPS
+            { duration: "2m",  target: 2  },  // hold  2 RPS
+            { duration: "30s", target: 8  },  // ramp 2 → 8 RPS
+            { duration: "2m",  target: 8  },  // hold  8 RPS
+            { duration: "30s", target: 0  },  // ramp down
+          ],
+        },
+      },
+      thresholds: {
+        // 95th-percentile latency must stay under 5 s
+        "inference_latency_ms": ["p(95)<5000"],
+        // Error rate must stay below 5 %
+        "error_rate": ["rate<0.05"],
+      },
+    };
+
+    // ---------------------------------------------------------------------------
+    // Setup: download the test image once and share it across all VUs
+    // ---------------------------------------------------------------------------
+    export function setup() {
+      const imageUrl =
+        "https://ultralytics.com/images/bus.jpg";
+      const res = http.get(imageUrl, { responseType: "binary" });
+      if (res.status !== 200) {
+        throw new Error(`Failed to download test image: ${res.status}`);
+      }
+      return { imageBytes: res.body };
+    }
+
+    // ---------------------------------------------------------------------------
+    // Default function: each VU iteration sends one /detect-upload request.
+    // No sleep() – arrival rate is controlled by the executor above.
+    // ---------------------------------------------------------------------------
+    const BASE_URL =
+      __ENV.OD_BASE_URL ||
+      "http://object-detection.ml-pipelines.svc.cluster.local:8000";
+
+    export default function (data) {
+      const payload = {
+        file: http.file(data.imageBytes, "test.jpg", "image/jpeg"),
+      };
+
+      const start = Date.now();
+      const res = http.post(`${BASE_URL}/detect-upload`, payload);
+      const elapsed = Date.now() - start;
+
+      const ok = check(res, {
+        "status 200":          (r) => r.status === 200,
+        "content-type image":  (r) => (r.headers["Content-Type"] || "").includes("image"),
+        "latency < 10s":       () => elapsed < 10000,
+      });
+
+      inferenceLatency.add(elapsed);
+      errorRate.add(!ok);
+      requestCount.add(1);
+    }
+
+---
+# Job: runs k6 as a one-shot Kubernetes Job.
+# Pin to the same node as the server for minimal network variance (same pattern
+# as the existing same-node-testing runbook).  Remove nodeSelector if you want
+# the scheduler to place it freely.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-load-test
+  namespace: ml-pipelines
+  labels:
+    app: k6-load-test
+spec:
+  # Set to 0 to prevent automatic retries on failure
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: k6-load-test
+    spec:
+      restartPolicy: Never
+      # Optional: pin to the same node as the object-detection pod.
+      # Replace the hostname value or remove this block to let k8s schedule freely.
+      # nodeSelector:
+      #   kubernetes.io/hostname: rci-tide-gpu-01.sdsu.edu
+      containers:
+      - name: k6
+        image: grafana/k6:0.51.0
+        args:
+          - run
+          - /scripts/load_test.js
+          - --out
+          - json=/tmp/k6-results.json
+        env:
+        - name: OD_BASE_URL
+          value: "http://object-detection.ml-pipelines.svc.cluster.local:8000"
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+      volumes:
+      - name: scripts
+        configMap:
+          name: k6-script

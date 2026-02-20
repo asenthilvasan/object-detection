@@ -1,0 +1,169 @@
+---
+# ConfigMap: Grafana datasource pointing at in-cluster Prometheus
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: ml-pipelines
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.ml-pipelines.svc.cluster.local:9090
+        isDefault: true
+        editable: false
+
+---
+# ConfigMap: Grafana dashboard provider – watches /var/lib/grafana/dashboards
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: ml-pipelines
+data:
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: ray-dashboards
+        orgId: 1
+        folder: Ray
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards
+
+---
+# ConfigMap: Ray Serve Grafana dashboard (official Ray dashboard JSON).
+# The full JSON is fetched from the Ray repo at deploy time via an init container.
+# This ConfigMap stores the download URLs so the init container knows what to pull.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-ray-dashboard-urls
+  namespace: ml-pipelines
+data:
+  # Official Ray-provided Grafana dashboard JSON files (Ray 2.x)
+  serve_deployment_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/serve_deployment_grafana_dashboard.json"
+  serve_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/serve_grafana_dashboard.json"
+  default_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/default_grafana_dashboard.json"
+  data_dashboard.json: "https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards/data_grafana_dashboard.json"
+
+---
+# PersistentVolumeClaim for Grafana state (plugins, DB)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+  namespace: ml-pipelines
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: ml-pipelines
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      initContainers:
+      # Download the official Ray Grafana dashboard JSON files before Grafana starts
+      - name: download-ray-dashboards
+        image: curlimages/curl:8.7.1
+        command:
+          - sh
+          - -c
+          - |
+            set -e
+            DEST=/dashboards
+            BASE="https://raw.githubusercontent.com/ray-project/ray/master/dashboard/modules/metrics/dashboards"
+            for name in \
+              serve_deployment_grafana_dashboard.json \
+              serve_grafana_dashboard.json \
+              default_grafana_dashboard.json \
+              data_grafana_dashboard.json; do
+              echo "Downloading $name ..."
+              curl -fsSL "$BASE/$name" -o "$DEST/$name"
+            done
+            echo "All Ray dashboards downloaded."
+        volumeMounts:
+        - name: dashboards
+          mountPath: /dashboards
+
+      containers:
+      - name: grafana
+        image: grafana/grafana:10.4.2
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "admin"          # Change or use a Secret in production
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+          value: "Viewer"
+        volumeMounts:
+        - name: grafana-data
+          mountPath: /var/lib/grafana
+        - name: datasources
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: dashboard-provider
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: dashboards
+          mountPath: /var/lib/grafana/dashboards
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+      volumes:
+      - name: grafana-data
+        persistentVolumeClaim:
+          claimName: grafana-data
+      - name: datasources
+        configMap:
+          name: grafana-datasources
+      - name: dashboard-provider
+        configMap:
+          name: grafana-dashboard-provider
+      - name: dashboards
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: ml-pipelines
+  labels:
+    app: grafana
+spec:
+  selector:
+    app: grafana
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+  type: ClusterIP

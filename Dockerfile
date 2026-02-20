@@ -35,7 +35,7 @@ COPY README.md ./
 COPY run_serve.py ./
 
 # Expose ports
-EXPOSE 8000 8265
+EXPOSE 8000 8080 8265
 
 # Start Ray Serve
 CMD ["python", "run_serve.py"]
