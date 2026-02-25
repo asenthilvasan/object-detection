@@ -26,20 +26,16 @@ data:
     // ---------------------------------------------------------------------------
     export const options = {
       scenarios: {
-        rps_ramp: {
+        constant_load: {
           executor: "ramping-arrival-rate",
-          startRate: 0,              // RPS at test start
-          timeUnit: "1s",            // rate unit
-          preAllocatedVUs: 50,       // VUs pre-warmed (increase if k6 warns)
-          maxVUs: 100,               // absolute VU ceiling
+          startRate: 0,
+          timeUnit: "1s",
+          preAllocatedVUs: 20,       // VUs pre-warmed (increase if k6 warns)
+          maxVUs: 50,                // absolute VU ceiling
           stages: [
-            { duration: "30s", target: 10 },  // ramp 0 → 10 RPS
-            { duration: "2m",  target: 10 },  // hold  10 RPS
-            { duration: "30s", target: 40 },  // ramp 10 → 40 RPS
-            { duration: "2m",  target: 40 },  // hold  40 RPS
-            { duration: "30s", target: 80 },  // ramp 40 → 80 RPS
-            { duration: "2m",  target: 80 },  // hold  80 RPS
-            { duration: "30s", target: 0  },  // ramp down
+            { duration: "5s",  target: 0  },  // 0 RPS for 5 seconds
+            { duration: "30s", target: 10 },  // 10 RPS for 30 seconds
+            { duration: "30s", target: 30 },  // 30 RPS for 30 seconds
           ],
         },
       },
@@ -136,11 +132,11 @@ spec:
           readOnly: true
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "500m"
+            memory: "2Gi"
+            cpu: "2"
           limits:
-            memory: "512Mi"
-            cpu: "1000m"
+            memory: "4Gi"
+            cpu: "4"
       volumes:
       - name: scripts
         configMap:

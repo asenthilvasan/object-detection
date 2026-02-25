@@ -69,13 +69,12 @@ from the Ray GitHub repo before the main container starts:
 | `serve_deployment_grafana_dashboard.json` | Per-deployment latency & throughput |
 | `data_grafana_dashboard.json` | Ray Data pipeline metrics |
 
-Wait for the init container to finish, then port-forward:
+Wait for the init container to finish -> must wait till the init container says "Running", then port-forward:
 
 ```bash
 kubectl port-forward -n ml-pipelines svc/grafana 3000:3000
 ```
-
-Open **http://localhost:3000** (login: `admin` / `admin`).
+Wait a couple of minutes for Grafana to fully initialize, then open **http://localhost:3000** (login: `admin` / `admin`).
 Navigate to **Dashboards → Ray** to see all four dashboards pre-loaded.
 
 > **Note:** The Prometheus datasource is pre-configured automatically via provisioning.
@@ -92,7 +91,7 @@ Navigate to **Dashboards → Ray** to see all four dashboards pre-loaded.
 kubectl apply -f k8s/k6-load-test.yaml
 
 # Watch the job run
-kubectl get job -n ml-pipelines k6-load-test -w
+kubectl get job -n ml-pipelines k6-load-test -w -> kind of whatever
 
 # Stream k6 output
 kubectl logs -n ml-pipelines -l app=k6-load-test -f
@@ -103,26 +102,30 @@ The default load profile uses the `ramping-arrival-rate` executor, which control
 
 | Stage | Duration | Target RPS |
 |-------|----------|------------|
-| Ramp-up | 30 s | 0 → 2 RPS |
-| Sustained | 2 min | 2 RPS |
-| Ramp-up | 30 s | 2 → 8 RPS |
-| Sustained | 2 min | 8 RPS |
-| Ramp-down | 30 s | 8 → 0 RPS |
+| Ramp-up | 30 s | 0 → 10 RPS |
+| Sustained | 2 min | 10 RPS |
+| Ramp-up | 30 s | 10 → 40 RPS |
+| Sustained | 2 min | 40 RPS |
+| Ramp-up | 30 s | 40 → 80 RPS |
+| Sustained | 2 min | 80 RPS |
+| Ramp-down | 30 s | 80 → 0 RPS |
 
 **Thresholds** (job fails if breached):
 - `p(95)` inference latency < 5 s
 - Error rate < 5 %
 
 > **VU sizing note:** `preAllocatedVUs` (default: 50) should be ≥ `target_rps × p99_latency_s`.
-> For example, at 8 RPS with ~2 s p99 latency you need ~16 VUs minimum. Increase
+> For example, at 80 RPS with ~2 s p99 latency you need ~160 VUs minimum. Increase
 > `preAllocatedVUs` / `maxVUs` in the ConfigMap if k6 logs a "insufficient VUs" warning.
 
 ### Re-running the Job
 
 Kubernetes Jobs are immutable once created. To re-run:
 
+### Deleting the job is important !!
+
 ```bash
-kubectl delete job -n ml-pipelines k6-load-test
+kubectl delete job -n ml-pipelines k6-load-test 
 kubectl apply -f k8s/k6-load-test.yaml
 ```
 
@@ -133,10 +136,12 @@ Edit the `stages` block inside the `rps_ramp` scenario in `k8s/k6-load-test.yaml
 
 ```js
 stages: [
-  { duration: "30s", target: 2  },  // ramp 0 → 2 RPS
-  { duration: "2m",  target: 2  },  // hold  2 RPS
-  { duration: "30s", target: 8  },  // ramp 2 → 8 RPS
-  { duration: "2m",  target: 8  },  // hold  8 RPS
+  { duration: "30s", target: 10 },  // ramp 0 → 10 RPS
+  { duration: "2m",  target: 10 },  // hold  10 RPS
+  { duration: "30s", target: 40 },  // ramp 10 → 40 RPS
+  { duration: "2m",  target: 40 },  // hold  40 RPS
+  { duration: "30s", target: 80 },  // ramp 40 → 80 RPS
+  { duration: "2m",  target: 80 },  // hold  80 RPS
   { duration: "30s", target: 0  },  // ramp down
 ],
 ```
@@ -172,6 +177,11 @@ kubectl delete -f k8s/k6-load-test.yaml
 kubectl delete -f k8s/grafana.yaml
 kubectl delete -f k8s/prometheus.yaml
 ```
+
+### The above commands do technically delete the PVC but not sure if it is consistent
+- in your terminal output from the commands above, look for ```persistentvolumeclaim "prometheus-data" deleted from ml-pipelines namespace```
+- if you see this, then the PVC is deleted
+- if you don't see this, then the PVC is not deleted and you need to delete it manually
 
 > PVCs (`prometheus-data`, `grafana-data`) are **not** deleted by the above commands.
 > Delete them explicitly if you want to reclaim storage:
