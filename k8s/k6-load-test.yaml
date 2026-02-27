@@ -30,8 +30,8 @@ data:
           executor: "ramping-arrival-rate",
           startRate: 0,
           timeUnit: "1s",
-          preAllocatedVUs: 100,       // VUs pre-warmed (increase if k6 warns)
-          maxVUs: 120,                // absolute VU ceiling
+          preAllocatedVUs: 300,       // VUs pre-warmed (increase if k6 warns)
+          maxVUs: 500,                // absolute VU ceiling
           stages: [
             { duration: "5s",  target: 0  },  // 0 RPS for 5 seconds
             { duration: "30s", target: 10 },  // 10 RPS for 30 seconds
