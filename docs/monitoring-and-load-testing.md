@@ -1,5 +1,7 @@
 # Prometheus + Grafana + k6 Load Testing (Kubernetes)
 
+**IMPORTANT**: This file assumes you have already deployed the object-detection service.
+
 This runbook sets up:
 1. **Prometheus** – scrapes Ray metrics from the object-detection pod
 2. **Grafana** – auto-provisions the official Ray-provided dashboards
@@ -31,6 +33,7 @@ This runbook sets up:
 
 Ray exposes metrics on **port 8080** (`/metrics`) automatically when `ray[serve]` is running.
 The `deployment.yaml` pod template already has the `prometheus.io/scrape` annotations set.
+
 
 ---
 
@@ -97,18 +100,6 @@ kubectl get job -n ml-pipelines k6-load-test -w -> kind of whatever
 kubectl logs -n ml-pipelines -l app=k6-load-test -f
 ```
 
-The default load profile uses the `ramping-arrival-rate` executor, which controls
-**requests per second** directly rather than concurrent VUs:
-
-| Stage | Duration | Target RPS |
-|-------|----------|------------|
-| Ramp-up | 30 s | 0 → 10 RPS |
-| Sustained | 2 min | 10 RPS |
-| Ramp-up | 30 s | 10 → 40 RPS |
-| Sustained | 2 min | 40 RPS |
-| Ramp-up | 30 s | 40 → 80 RPS |
-| Sustained | 2 min | 80 RPS |
-| Ramp-down | 30 s | 80 → 0 RPS |
 
 **Thresholds** (job fails if breached):
 - `p(95)` inference latency < 5 s
@@ -129,44 +120,12 @@ kubectl delete job -n ml-pipelines k6-load-test
 kubectl apply -f k8s/k6-load-test.yaml
 ```
 
-### Tuning load
-
-Edit the `stages` block inside the `rps_ramp` scenario in `k8s/k6-load-test.yaml`.
-`target` is **requests per second**:
-
-```js
-stages: [
-  { duration: "30s", target: 10 },  // ramp 0 → 10 RPS
-  { duration: "2m",  target: 10 },  // hold  10 RPS
-  { duration: "30s", target: 40 },  // ramp 10 → 40 RPS
-  { duration: "2m",  target: 40 },  // hold  40 RPS
-  { duration: "30s", target: 80 },  // ramp 40 → 80 RPS
-  { duration: "2m",  target: 80 },  // hold  80 RPS
-  { duration: "30s", target: 0  },  // ramp down
-],
-```
-
-Increase `target` values or add more stages to stress the system harder.
-
-### Same-node placement
-
-To pin k6 to the same node as the object-detection pod (eliminates cross-node network
-variance), uncomment the `nodeSelector` block in `k8s/k6-load-test.yaml` and set the
-correct hostname (see `docs/same-node-testing.md` for how to find the node name).
-
----
-
 ## 4. Watching metrics during load
 
 With both port-forwards active:
 
 - **Grafana → Ray → Serve Deployment Dashboard**: watch `num_ongoing_requests`,
   `request_latency_ms`, `replica_starts_total` update in real time as k6 ramps up.
-- **Grafana → Ray → Default Dashboard**: watch CPU/memory/actor counts.
-- **Prometheus → Graph**: ad-hoc PromQL queries like:
-  ```promql
-  histogram_quantile(0.95, rate(ray_serve_deployment_request_latency_ms_bucket[1m]))
-  ```
 
 ---
 
