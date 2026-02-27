@@ -30,11 +30,11 @@ data:
           executor: "ramping-arrival-rate",
           startRate: 0,
           timeUnit: "1s",
-          preAllocatedVUs: 500,       // VUs pre-warmed (increase if k6 warns)
-          maxVUs: 2500,                // absolute VU ceiling
+          preAllocatedVUs: 400,       // VUs pre-warmed (increase if k6 warns)
+          maxVUs: 500,                 // absolute VU ceiling
           stages: [
             { duration: "5s",  target: 0  },  // 0 RPS for 5 seconds
-            { duration: "30s",  target: 200},  
+            { duration: "30s",  target: 50},  
           ],
         },
       },
@@ -114,13 +114,20 @@ spec:
       initContainers:
       - name: download-image
         image: curlimages/curl:8.5.0
-        # Download 3 distinct images so each request hits a different file
+        # Download 2 distinct images so each request hits a different file
         command: ["/bin/sh", "-c",
           "curl -fsSL -o /data/image0.jpg https://ultralytics.com/images/bus.jpg &&
            curl -fsSL -o /data/image1.jpg https://ultralytics.com/images/zidane.jpg"]
         volumeMounts:
         - name: test-data
           mountPath: /data
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "400m"
       containers:
       - name: k6
         image: grafana/k6:0.51.0
@@ -140,11 +147,11 @@ spec:
           readOnly: true
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "2"
+            memory: "512Mi"
+            cpu: "1"
           limits:
-            memory: "4Gi"
-            cpu: "4"
+            memory: "1Gi"
+            cpu: "1200m"
       volumes:
       - name: scripts
         configMap:

@@ -16,11 +16,18 @@ from ray.serve.handle import DeploymentHandle
 app = FastAPI()
 
 
-@serve.deployment(num_replicas=1, max_ongoing_requests=100)
+@serve.deployment(num_replicas=2, max_ongoing_requests=100)
 @serve.ingress(app)
 class APIIngress:
     def __init__(self, object_detection_handle: DeploymentHandle):
         self.handle = object_detection_handle
+        self.loop = asyncio.get_running_loop()
+
+    @staticmethod
+    def _encode_jpeg(image) -> bytes:
+        file_stream = BytesIO()
+        image.save(file_stream, "jpeg")
+        return file_stream.getvalue()
 
     @app.get(
         "/detect",
@@ -29,9 +36,8 @@ class APIIngress:
     )
     async def detect(self, image_url: str):
         image = await self.handle.detect.remote(image_url)
-        file_stream = BytesIO()
-        image.save(file_stream, "jpeg")
-        return Response(content=file_stream.getvalue(), media_type="image/jpeg")
+        content = await self.loop.run_in_executor(None, self._encode_jpeg, image)
+        return Response(content=content, media_type="image/jpeg")
 
     @app.post(
         "/detect-upload",
@@ -41,16 +47,15 @@ class APIIngress:
     async def detect_upload(self, file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = await self.handle.detect_bytes.remote(image_bytes)
-        file_stream = BytesIO()
-        image.save(file_stream, "jpeg")
-        return Response(content=file_stream.getvalue(), media_type="image/jpeg")
+        content = await self.loop.run_in_executor(None, self._encode_jpeg, image)
+        return Response(content=content, media_type="image/jpeg")
 
 
 @serve.deployment(
     ray_actor_options={"num_cpus": 2, "num_gpus": 1},
     health_check_period_s=60,
     health_check_timeout_s=30,
-    max_ongoing_requests=100,
+    max_ongoing_requests=64,
     #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
 )
 class ObjectDetection:

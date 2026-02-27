@@ -38,11 +38,11 @@ spec:
           name: ray-metrics
         resources:
           requests:
-            memory: "8Gi" # increase this
-            cpu: "4" #increase this
+            memory: "8Gi"
+            cpu: "8"
           limits:
             memory: "16Gi"
-            cpu: "8"
+            cpu: "16"
             nvidia.com/gpu: 1  # Request 1 GPU
         readinessProbe:
           httpGet:

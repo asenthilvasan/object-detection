@@ -1,0 +1,231 @@
+---
+# ConfigMap: k6 load test script
+# Sends POST /detect-upload requests with a test JPEG pre-downloaded by an init container.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-script
+  namespace: ml-pipelines
+data:
+  load_test.js: |
+    import http from "k6/http";
+    import { check } from "k6";
+    import { scenario as execScenario } from "k6/execution";
+    import { Trend, Counter, Rate } from "k6/metrics";
+
+    // =========================================================================
+    // CONFIG – stepped constant-arrival-rate scenarios
+    // =========================================================================
+    const RPS_LIST = [1, 5, 10, 20, 30, 40, 50, 60];
+    const DURATION = "30s";          // per stage
+    const TIME_UNIT = "1s";
+    const PREALLOC_VUS = 400;
+    const MAX_VUS = 400;
+    const GRACEFUL_STOP = "0s";      // hard stop so stages don't bleed
+    const START_GAP_SECONDS = 120;   // cooldown between stages
+
+    const BASE_URL =
+      __ENV.OD_BASE_URL ||
+      "http://object-detection.ml-pipelines.svc.cluster.local:8000";
+
+    // =========================================================================
+    // Build sequential scenarios
+    // =========================================================================
+    const scenarios = {};
+    RPS_LIST.forEach((rps, i) => {
+      scenarios[`rps_${rps}`] = {
+        executor: "constant-arrival-rate",
+        rate: rps,
+        timeUnit: TIME_UNIT,
+        duration: DURATION,
+        preAllocatedVUs: PREALLOC_VUS,
+        maxVUs: MAX_VUS,
+        gracefulStop: GRACEFUL_STOP,
+        startTime: `${i * START_GAP_SECONDS}s`,
+      };
+    });
+    export const options = { scenarios };
+
+    // =========================================================================
+    // Per-RPS custom metrics
+    // =========================================================================
+    const dur = {}, done = {}, ok = {};
+    for (const rps of RPS_LIST) {
+      dur[rps]  = new Trend(`http_duration_rps_${rps}`, true);
+      done[rps] = new Counter(`http_done_rps_${rps}`);
+      ok[rps]   = new Rate(`http_ok_rate_rps_${rps}`);
+    }
+
+    // =========================================================================
+    // Load test image from disk (pre-downloaded by init container)
+    // =========================================================================
+    const imageBytes = open("/data/test_image.jpg", "b");
+
+    // =========================================================================
+    // Test function – one HTTP POST per iteration
+    // =========================================================================
+    export default () => {
+      const t0 = Date.now();
+      let success = false;
+
+      try {
+        const payload = {
+          file: http.file(imageBytes, "test.jpg", "image/jpeg"),
+        };
+
+        const res = http.post(`${BASE_URL}/detect-upload`, payload, {
+          timeout: "30s",
+        });
+
+        success = check(res, {
+          "status 200":         (r) => r.status === 200,
+          "content-type image": (r) => (r.headers["Content-Type"] || "").includes("image"),
+        });
+      } catch (_) {
+        success = false;
+      }
+
+      const dt = Date.now() - t0;
+
+      const scen = execScenario.name;
+      const rps = Number(scen.split("_")[1]);
+      if (!Number.isNaN(rps)) {
+        dur[rps].add(dt);
+        done[rps].add(1);
+        ok[rps].add(success);
+      }
+    };
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+    function parseDurationSeconds(str) {
+      const re = /(\d+)(ms|s|m|h)/g;
+      let total = 0, m;
+      while ((m = re.exec(str)) !== null) {
+        const v = Number(m[1]);
+        total += m[2] === "ms" ? v / 1000
+             :  m[2] === "s"  ? v
+             :  m[2] === "m"  ? v * 60
+             :                   v * 3600;
+      }
+      return Math.round(total);
+    }
+    const DURATION_SECS = parseDurationSeconds(DURATION);
+
+    // =========================================================================
+    // Summary → CSV (written to /output/ and stdout)
+    // =========================================================================
+    export function handleSummary(data) {
+      let csv = "rps,p95_ms,avg_ms,iterations,ok_count,fail_count,iter_dropped,ok_rate,scheduled,completion_pct\n";
+
+      for (const rps of RPS_LIST) {
+        const mDur  = data.metrics[`http_duration_rps_${rps}`];
+        const mDone = data.metrics[`http_done_rps_${rps}`];
+        const mOk   = data.metrics[`http_ok_rate_rps_${rps}`];
+
+        const p95 = mDur && mDur.values ? mDur.values["p(95)"] : undefined;
+        const avg = mDur && mDur.values ? mDur.values["avg"] : undefined;
+
+        const iterations = (mDone && mDone.values ? (mDone.values.count || mDone.values.sum) : 0) || 0;
+        const okCount    = (mOk && mOk.values ? mOk.values.passes : 0) || 0;
+        const failCount  = (mOk && mOk.values && mOk.values.fails !== undefined) ? mOk.values.fails : Math.max(0, iterations - okCount);
+        const okRate     = (mOk && mOk.values && mOk.values.rate !== undefined) ? mOk.values.rate : (iterations ? okCount / iterations : 0);
+
+        const scheduled   = rps * DURATION_SECS;
+        const iterDropped = Math.max(0, scheduled - iterations);
+        const completion  = scheduled ? (iterations / scheduled) : 0;
+
+        csv += [
+          rps,
+          p95 !== undefined ? p95.toFixed(2) : "",
+          avg !== undefined ? avg.toFixed(2) : "",
+          iterations,
+          okCount,
+          failCount,
+          iterDropped,
+          okRate.toFixed(4),
+          scheduled,
+          (completion * 100).toFixed(1),
+        ].join(",") + "\n";
+      }
+
+      return {
+        "/output/p95_by_rps.csv": csv,
+        stdout: csv,
+      };
+    }
+
+---
+# Job: runs k6 as a one-shot Kubernetes Job.
+# Pin to the same node as the server for minimal network variance (same pattern
+# as the existing same-node-testing runbook).  Remove nodeSelector if you want
+# the scheduler to place it freely.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-load-test
+  namespace: ml-pipelines
+  labels:
+    app: k6-load-test
+spec:
+  # Set to 0 to prevent automatic retries on failure
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: k6-load-test
+    spec:
+      restartPolicy: Never
+      # Optional: pin to the same node as the object-detection pod.
+      # Replace the hostname value or remove this block to let k8s schedule freely.
+      # nodeSelector:
+      #   kubernetes.io/hostname: rci-tide-gpu-01.sdsu.edu
+      initContainers:
+      - name: download-image
+        image: curlimages/curl:8.5.0
+        command: ["curl", "-fsSL", "-o", "/data/test_image.jpg",
+                  "https://ultralytics.com/images/bus.jpg"]
+        volumeMounts:
+        - name: test-data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      containers:
+      - name: k6
+        image: grafana/k6:0.51.0
+        args:
+          - run
+          - --no-usage-report
+          - /scripts/load_test.js
+        env:
+        - name: OD_BASE_URL
+          value: "http://object-detection.ml-pipelines.svc.cluster.local:8000"
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        - name: test-data
+          mountPath: /data
+          readOnly: true
+        - name: output
+          mountPath: /output
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "1"
+          limits:
+            memory: "1Gi"
+            cpu: "1200m"
+      volumes:
+      - name: scripts
+        configMap:
+          name: k6-script
+      - name: test-data
+        emptyDir: {}
+      - name: output
+        emptyDir: {}
