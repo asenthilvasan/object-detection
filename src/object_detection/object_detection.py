@@ -65,7 +65,7 @@ class ObjectDetection:
     
     # max_concurrent_batches=2: while one batch runs in the thread pool, the event loop
     # can accumulate a second batch simultaneously — pipelines GPU work and reduces idle time.
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5, max_concurrent_batches=2)
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1, max_concurrent_batches=2)
     async def detect(self, image_urls: list[str]):
         # run_in_executor keeps the async event loop free while inference runs in a thread.
         # This is required for max_concurrent_batches > 1 to work — without it, the event
@@ -73,16 +73,14 @@ class ObjectDetection:
         return await self.loop.run_in_executor(None, self._run_detect, image_urls)
 
     def _run_detect(self, image_urls: list[str]):
-        print(f"DEBUG: Processing batch of size {len(image_urls)}")
         results = self.model(image_urls)
         return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
 
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5, max_concurrent_batches=2)
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1, max_concurrent_batches=2)
     async def detect_bytes(self, image_bytes_list: list[bytes]):
         return await self.loop.run_in_executor(None, self._run_detect_bytes, image_bytes_list)
 
     def _run_detect_bytes(self, image_bytes_list: list[bytes]):
-        print(f"DEBUG: Processing batch of size {len(image_bytes_list)}")
         images = [Image.open(BytesIO(b)) for b in image_bytes_list]
         results = self.model(images)
         return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
