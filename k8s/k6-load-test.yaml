@@ -30,12 +30,13 @@ data:
           executor: "ramping-arrival-rate",
           startRate: 0,
           timeUnit: "1s",
-          preAllocatedVUs: 20,       // VUs pre-warmed (increase if k6 warns)
-          maxVUs: 50,                // absolute VU ceiling
+          preAllocatedVUs: 100,       // VUs pre-warmed (increase if k6 warns)
+          maxVUs: 120,                // absolute VU ceiling
           stages: [
             { duration: "5s",  target: 0  },  // 0 RPS for 5 seconds
             { duration: "30s", target: 10 },  // 10 RPS for 30 seconds
             { duration: "30s", target: 30 },  // 30 RPS for 30 seconds
+            { duration: "30s", target: 100 }, //100 RPS for 30 seconds
           ],
         },
       },
@@ -50,7 +51,12 @@ data:
     // ---------------------------------------------------------------------------
     // Load the test image from disk (pre-downloaded by init container)
     // ---------------------------------------------------------------------------
-    const imageBytes = open("/data/test_image.jpg", "b");
+    // Load 3 different images — prevents OS page cache from making preprocessing
+    // appear artificially fast (happens when the same file is read every iteration)
+    const images = [
+      open("/data/image0.jpg", "b"),
+      open("/data/image1.jpg", "b"),
+    ];
 
     // ---------------------------------------------------------------------------
     // Default function: each VU iteration sends one /detect-upload request.
@@ -61,8 +67,10 @@ data:
       "http://object-detection.ml-pipelines.svc.cluster.local:8000";
 
     export default function () {
+      // Pick a different image each iteration so preprocessing cost is realistic
+      const img = images[Math.floor(Math.random() * images.length)];
       const payload = {
-        file: http.file(imageBytes, "test.jpg", "image/jpeg"),
+        file: http.file(img, "test.jpg", "image/jpeg"),
       };
 
       const start = Date.now();
@@ -108,8 +116,10 @@ spec:
       initContainers:
       - name: download-image
         image: curlimages/curl:8.5.0
-        command: ["curl", "-fsSL", "-o", "/data/test_image.jpg",
-                  "https://ultralytics.com/images/bus.jpg"]
+        # Download 3 distinct images so each request hits a different file
+        command: ["/bin/sh", "-c",
+          "curl -fsSL -o /data/image0.jpg https://ultralytics.com/images/bus.jpg &&
+           curl -fsSL -o /data/image1.jpg https://ultralytics.com/images/zidane.jpg"]
         volumeMounts:
         - name: test-data
           mountPath: /data

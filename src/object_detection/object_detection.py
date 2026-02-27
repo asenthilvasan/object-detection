@@ -1,6 +1,5 @@
 import ray
 import torch
-import asyncio
 from PIL import Image
 import numpy as np
 from io import BytesIO
@@ -59,28 +58,20 @@ class ObjectDetection:
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
-        self.loop = asyncio.get_running_loop()
 
     
     
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5)
     async def detect(self, image_urls: list[str]):
-        return await self.loop.run_in_executor(None, self._detect_batch_impl, image_urls)
-
-    def _detect_batch_impl(self, image_urls: list[str]):
+        # Called directly — no thread pool indirection, so batch start time is deterministic
         print(f"DEBUG: Processing batch of size {len(image_urls)}")
-        # Run inference on batch of URLs
         results = self.model(image_urls)
-        # Render returns a list of arrays
         return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
 
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.1)
+    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5)
     async def detect_bytes(self, image_bytes_list: list[bytes]):
-        return await self.loop.run_in_executor(None, self._detect_bytes_batch_impl, image_bytes_list)
-
-    def _detect_bytes_batch_impl(self, image_bytes_list: list[bytes]):
+        # Called directly — no thread pool indirection, so batch start time is deterministic
         print(f"DEBUG: Processing batch of size {len(image_bytes_list)}")
-        # Load images from bytes
         images = [Image.open(BytesIO(b)) for b in image_bytes_list]
         results = self.model(images)
         return [Image.fromarray(im.astype(np.uint8)) for im in results.render()]
