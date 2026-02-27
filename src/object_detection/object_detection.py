@@ -46,7 +46,7 @@ class APIIngress:
 
 
 @serve.deployment(
-    ray_actor_options={"num_cpus": 1, "num_gpus": 1},
+    ray_actor_options={"num_cpus": 2, "num_gpus": 1},
     health_check_period_s=60,
     health_check_timeout_s=30,
     max_ongoing_requests=100,
