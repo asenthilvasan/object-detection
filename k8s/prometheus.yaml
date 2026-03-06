@@ -17,7 +17,7 @@ data:
         static_configs:
           - targets: ["object-detection.ml-pipelines.svc.cluster.local:8080"]
         metrics_path: /metrics
-        scrape_interval: 5s
+        scrape_interval: 2s  # tightened from 5s — short GPU bursts were being missed
 
 ---
 # PersistentVolumeClaim for Prometheus data
