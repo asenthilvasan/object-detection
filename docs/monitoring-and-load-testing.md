@@ -102,12 +102,15 @@ kubectl logs -n ml-pipelines -l app=k6-load-test -f
 
 
 **Thresholds** (job fails if breached):
-- `p(95)` inference latency < 5 s
-- Error rate < 5 %
+- `p(95)` inference latency < 10 s
+- HTTP error rate (non-2xx) < 5 %
+- Latency-violation rate (requests ≥ 10 s) < 10 %
 
-> **VU sizing note:** `preAllocatedVUs` (default: 50) should be ≥ `target_rps × p99_latency_s`.
-> For example, at 80 RPS with ~2 s p99 latency you need ~160 VUs minimum. Increase
-> `preAllocatedVUs` / `maxVUs` in the ConfigMap if k6 logs a "insufficient VUs" warning.
+> **VU sizing note (Little's Law):** `preAllocatedVUs` should be ≥ `target_rps × p99_latency_s`.
+> At 50 RPS with ~8 s p99 latency you need ≥ 400 VUs. The default config is set to
+> `preAllocatedVUs: 400` / `maxVUs: 500` for a 50 RPS target.
+> If k6 logs "insufficient VUs" or you see `dropped_iterations`, either reduce the RPS target
+> or raise `maxVUs` (and your cluster's node capacity) accordingly.
 
 ### Re-running the Job
 

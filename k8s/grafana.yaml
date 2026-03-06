@@ -31,26 +31,10 @@ data:
         orgId: 1
         folder: Ray
         type: file
-        disableDeletion: false
+        disableDeletion: true
         updateIntervalSeconds: 30
         options:
           path: /var/lib/grafana/dashboards
-
----
-# ConfigMap: Ray Serve Grafana dashboard (official Ray dashboard JSON).
-# The full JSON is fetched from the Ray repo at deploy time via an init container.
-# This ConfigMap stores the download URLs so the init container knows what to pull.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-ray-dashboard-urls
-  namespace: ml-pipelines
-data:
-  # Official Ray-provided Grafana dashboard JSON files (Ray 2.x)
-  serve_deployment_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/serve_deployment_grafana_dashboard.json"
-  serve_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/serve_grafana_dashboard.json"
-  default_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/default_grafana_dashboard.json"
-  data_dashboard.json: "https://raw.githubusercontent.com/ray-project/kuberay/master/config/grafana/data_grafana_dashboard.json"
 
 ---
 # PersistentVolumeClaim for Grafana state (plugins, DB)

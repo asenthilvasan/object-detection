@@ -19,8 +19,6 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
     spec:
-      nodeSelector:
-        nvidia.com/gpu.product: Tesla-V100-SXM2-32GB
       tolerations:
       - key: "nautilus.io/issue"
         operator: "Exists"
@@ -38,8 +36,8 @@ spec:
           name: ray-metrics
         resources:
           requests:
-            memory: "8Gi" # increase this
-            cpu: "8" #increase this
+            memory: "8Gi"
+            cpu: "2"
           limits:
             memory: "16Gi"
             cpu: "8"
@@ -49,11 +47,12 @@ spec:
           value: "1000"  # Ray samples GPU every 1s (default 10s) — required for trustworthy GPU graphs
         readinessProbe:
           httpGet:
-            path: /detect?image_url=https://ultralytics.com/images/bus.jpg
+            path: /-/routes
             port: 8000
           initialDelaySeconds: 60
           periodSeconds: 10
-          timeoutSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 6
 ---
 apiVersion: v1
 kind: Service

@@ -27,7 +27,8 @@ RUN pip install --no-cache-dir \
     pandas \
     gitpython \
     requests \
-    python-multipart
+    python-multipart \
+    nvidia-ml-py
 
 # Copy application code
 COPY src/ ./src/

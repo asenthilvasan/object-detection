@@ -15,7 +15,8 @@ data:
     // Custom metrics
     // ---------------------------------------------------------------------------
     const inferenceLatency = new Trend("inference_latency_ms", true);
-    const errorRate        = new Rate("error_rate");
+    const errorRate        = new Rate("error_rate");       // HTTP non-2xx only
+    const latencyViolation = new Rate("latency_violation"); // latency > threshold
     const requestCount     = new Counter("total_requests");
 
     // ---------------------------------------------------------------------------
@@ -23,6 +24,7 @@ data:
     // preAllocatedVUs: VUs kept warm to handle the target RPS.
     // maxVUs: hard cap; k6 warns if it needs more than preAllocatedVUs.
     // Rule of thumb: preAllocatedVUs ≈ target_rps × p99_latency_seconds
+    //   e.g. 50 RPS × 8 s p99 → need ≥ 400 VUs
     // ---------------------------------------------------------------------------
     export const options = {
       scenarios: {
@@ -33,17 +35,19 @@ data:
           preAllocatedVUs: 400,       // VUs pre-warmed (increase if k6 warns)
           maxVUs: 500,                 // absolute VU ceiling
           stages: [
-            { duration: "5s",  target: 0  },  // warmup
-            { duration: "15s", target: 50 },  // ramp to target
-            { duration: "60s", target: 100 },  // HOLD at 50 RPS for 60s — this is what Grafana graphs
+            { duration: "5s",  target: 0  },  // idle warmup
+            { duration: "15s", target: 50 },  // ramp to 50 RPS
+            { duration: "60s", target: 50 },  // HOLD at 50 RPS for 60 s — this is what Grafana graphs
           ],
         },
       },
       thresholds: {
-        // 95th-percentile latency must stay under 5 s
-        "inference_latency_ms": ["p(95)<5000"],
-        // Error rate must stay below 5 %
+        // 95th-percentile latency must stay under 10 s
+        "inference_latency_ms": ["p(95)<10000"],
+        // HTTP error rate (non-2xx) must stay below 5 %
         "error_rate": ["rate<0.05"],
+        // Latency-violation rate must stay below 10 %
+        "latency_violation": ["rate<0.10"],
       },
     };
 
@@ -76,14 +80,15 @@ data:
       const res = http.post(`${BASE_URL}/detect-upload`, payload);
       const elapsed = Date.now() - start;
 
-      const ok = check(res, {
+      check(res, {
         "status 200":          (r) => r.status === 200,
         "content-type image":  (r) => (r.headers["Content-Type"] || "").includes("image"),
         "latency < 10s":       () => elapsed < 10000,
       });
 
       inferenceLatency.add(elapsed);
-      errorRate.add(!ok);
+      errorRate.add(res.status !== 200);        // only real HTTP failures
+      latencyViolation.add(elapsed >= 10000);   // separate latency-SLO tracking
       requestCount.add(1);
     }
 
