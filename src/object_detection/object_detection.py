@@ -55,7 +55,7 @@ class APIIngress:
     ray_actor_options={"num_cpus": 2, "num_gpus": 1},
     health_check_period_s=60,
     health_check_timeout_s=30,
-    max_ongoing_requests=100,
+    max_ongoing_requests=500,
     #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
 )
 class ObjectDetection:
@@ -66,7 +66,7 @@ class ObjectDetection:
         self.model.to(self.device)
         self.loop = asyncio.get_running_loop()
         # Confirm deployed config — check logs after rollout to verify this code is running
-        print("STARTUP: batch_wait_timeout_s=0.5, max_concurrent_batches=2, max_ongoing_requests=500")
+        print(f"STARTUP: batch_wait_timeout_s=0.5, max_concurrent_batches=2, max_ongoing_requests=100")
 
     
     

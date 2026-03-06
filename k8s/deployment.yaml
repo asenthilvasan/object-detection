@@ -39,11 +39,14 @@ spec:
         resources:
           requests:
             memory: "8Gi" # increase this
-            cpu: "4" #increase this
+            cpu: "8" #increase this
           limits:
             memory: "16Gi"
             cpu: "8"
             nvidia.com/gpu: 1  # Request 1 GPU
+        env:
+        - name: RAY_METRICS_REPORT_INTERVAL_MS
+          value: "1000"  # Ray samples GPU every 1s (default 10s) — required for trustworthy GPU graphs
         readinessProbe:
           httpGet:
             path: /detect?image_url=https://ultralytics.com/images/bus.jpg
