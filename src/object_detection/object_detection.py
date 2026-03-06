@@ -54,11 +54,10 @@ class APIIngress:
 
 
 @serve.deployment(
-    ray_actor_options={"num_cpus": 2, "num_gpus": 1},
+    ray_actor_options={"num_cpus": 1, "num_gpus": 1},
     health_check_period_s=60,
     health_check_timeout_s=30,
     max_ongoing_requests=100,
-    #autoscaling_config={"min_replicas": 1, "max_replicas": 2},
 )
 class ObjectDetection:
     def __init__(self):
@@ -66,11 +65,6 @@ class ObjectDetection:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.loop = asyncio.get_running_loop()
-
-        # ---------------------------------------------------------------
-        # Per-stage timing histograms — exported to Prometheus at /metrics
-        # Query these in Grafana to see where latency is spent per batch.
-        # ---------------------------------------------------------------
         self._preprocess_hist = Histogram(
             "od_preprocess_ms",
             description="CPU time: JPEG decode via PIL per batch (ms)",
@@ -92,15 +86,10 @@ class ObjectDetection:
             boundaries=[1, 2, 4, 8, 16, 24, 32],
         )
 
-        print(f"STARTUP: batch_wait=0.5s, max_concurrent_batches=2, max_ongoing=100, device={self.device}")
+        print(f"STARTUP: batch_wait=0.01s, max_concurrent_batches=1, max_batch=10, max_ongoing=100, device={self.device}")
 
-    # max_concurrent_batches=2: while one batch runs in the thread pool, the event loop
-    # can accumulate a second batch simultaneously — pipelines GPU work and reduces idle time.
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5, max_concurrent_batches=2)
+    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.01)
     async def detect(self, image_urls: list[str]):
-        # run_in_executor keeps the async event loop free while inference runs in a thread.
-        # This is required for max_concurrent_batches > 1 to work — without it, the event
-        # loop blocks and the second batch cannot accumulate while the first one executes.
         return await self.loop.run_in_executor(None, self._run_detect, image_urls)
 
     def _run_detect(self, image_urls: list[str]):
@@ -131,7 +120,7 @@ class ObjectDetection:
         print(f"STAGES batch={batch_size} | inference={inf_ms:.1f}ms | postprocess={post_ms:.1f}ms")
         return output
 
-    @serve.batch(max_batch_size=32, batch_wait_timeout_s=0.5, max_concurrent_batches=2)
+    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.01)
     async def detect_bytes(self, image_bytes_list: list[bytes]):
         return await self.loop.run_in_executor(None, self._run_detect_bytes, image_bytes_list)
 
