@@ -10,7 +10,7 @@ from fastapi import FastAPI, UploadFile, File
 
 from ray import serve
 from ray.serve.handle import DeploymentHandle
-from ray.serve.metrics import Histogram
+from ray.serve.metrics import Counter, Histogram
 
 # Ray initialization is handled by run_serve.py in Docker
 # or automatically by serve run locally
@@ -24,9 +24,18 @@ class APIIngress:
     def __init__(self, object_detection_handle: DeploymentHandle):
         self.handle = object_detection_handle
         self.loop = asyncio.get_running_loop()
+        self._handle_roundtrip_hist = Histogram(
+            "od_handle_roundtrip_ms",
+            description="Full .remote() round-trip: Ray serialization + batch wait + model + return (ms)",
+            boundaries=[25, 50, 100, 250, 500, 1000, 2000, 5000, 10000],
+        )
+        self._jpeg_encode_hist = Histogram(
+            "od_jpeg_encode_ms",
+            description="Response JPEG encoding time in APIIngress (ms)",
+            boundaries=[5, 10, 25, 50, 100, 250, 500, 1000],
+        )
 
-    @staticmethod
-    def _encode_jpeg(image) -> bytes:
+    def _encode_jpeg(self, image) -> bytes:
         file_stream = BytesIO()
         image.save(file_stream, "jpeg")
         return file_stream.getvalue()
@@ -37,8 +46,13 @@ class APIIngress:
         response_class=Response,
     )
     async def detect(self, image_url: str):
+        t0 = time.perf_counter()
         image = await self.handle.detect.remote(image_url)
+        t1 = time.perf_counter()
         content = await self.loop.run_in_executor(None, self._encode_jpeg, image)
+        t2 = time.perf_counter()
+        self._handle_roundtrip_hist.observe((t1 - t0) * 1000)
+        self._jpeg_encode_hist.observe((t2 - t1) * 1000)
         return Response(content=content, media_type="image/jpeg")
 
     @app.post(
@@ -48,8 +62,15 @@ class APIIngress:
     )
     async def detect_upload(self, file: UploadFile = File(...)):
         image_bytes = await file.read()
+        t0 = time.perf_counter()
         image = await self.handle.detect_bytes.remote(image_bytes)
+        t1 = time.perf_counter()
         content = await self.loop.run_in_executor(None, self._encode_jpeg, image)
+        t2 = time.perf_counter()
+        roundtrip_ms = (t1 - t0) * 1000
+        encode_ms = (t2 - t1) * 1000
+        self._handle_roundtrip_hist.observe(roundtrip_ms)
+        self._jpeg_encode_hist.observe(encode_ms)
         return Response(content=content, media_type="image/jpeg")
 
 
@@ -85,6 +106,10 @@ class ObjectDetection:
             description="Number of images per batch",
             boundaries=[1, 2, 4, 8, 16, 24, 32],
         )
+        self._gpu_active_ms = Counter(
+            "od_gpu_active_ms_total",
+            description="Cumulative GPU inference time (ms). rate()/10 = GPU duty cycle %.",
+        )
 
         print(f"STARTUP: batch_wait=0.01s, max_concurrent_batches=1, max_batch=10, max_ongoing=100, device={self.device}")
 
@@ -116,6 +141,7 @@ class ObjectDetection:
         post_ms = (t2 - t1) * 1000
         self._inference_hist.observe(inf_ms)
         self._postprocess_hist.observe(post_ms)
+        self._gpu_active_ms.inc(inf_ms)
 
         print(f"STAGES batch={batch_size} | inference={inf_ms:.1f}ms | postprocess={post_ms:.1f}ms")
         return output
@@ -154,6 +180,7 @@ class ObjectDetection:
         self._preprocess_hist.observe(pre_ms)
         self._inference_hist.observe(inf_ms)
         self._postprocess_hist.observe(post_ms)
+        self._gpu_active_ms.inc(inf_ms)
 
         print(
             f"STAGES batch={batch_size}"
