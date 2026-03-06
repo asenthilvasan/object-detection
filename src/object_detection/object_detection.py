@@ -111,9 +111,9 @@ class ObjectDetection:
             description="Cumulative GPU inference time (ms). rate()/10 = GPU duty cycle %.",
         )
 
-        print(f"STARTUP: batch_wait=0.01s, max_concurrent_batches=1, max_batch=10, max_ongoing=100, device={self.device}")
+        print(f"STARTUP: batch_wait=0.05s, max_concurrent_batches=1, max_batch=10, max_ongoing=100, device={self.device}")
 
-    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.01)
+    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.05)
     async def detect(self, image_urls: list[str]):
         return await self.loop.run_in_executor(None, self._run_detect, image_urls)
 
@@ -146,7 +146,7 @@ class ObjectDetection:
         print(f"STAGES batch={batch_size} | inference={inf_ms:.1f}ms | postprocess={post_ms:.1f}ms")
         return output
 
-    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.01)
+    @serve.batch(max_batch_size=10, batch_wait_timeout_s=0.05)
     async def detect_bytes(self, image_bytes_list: list[bytes]):
         return await self.loop.run_in_executor(None, self._run_detect_bytes, image_bytes_list)
 
