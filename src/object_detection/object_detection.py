@@ -6,7 +6,7 @@ from PIL import Image
 import numpy as np
 from io import BytesIO
 from fastapi.responses import Response
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File
 
 from ray import serve
 from ray.serve.handle import DeploymentHandle
@@ -30,6 +30,21 @@ class APIIngress:
             "od_jpeg_encode_ms",
             description="Response JPEG encoding time in APIIngress (ms)",
             boundaries=[5, 10, 25, 50, 100, 250, 500, 1000],
+        )
+        # Queue 2: time between k6 sending the request and detect_upload being called.
+        # Captures Ray Serve proxy queue wait (requests held at proxy until an
+        # APIIngress slot is free). Requires X-Send-Time header from k6.
+        # Same-node deployment means clock skew ≈ 0ms.
+        self._proxy_queue_hist = Histogram(
+            "od_proxy_queue_ms",
+            description="Ray Serve proxy queue wait: time from k6 send to APIIngress entry (ms). Requires X-Send-Time header.",
+            boundaries=[1, 5, 25, 100, 500, 1000, 2500, 5000, 10000, 30000, 60000, 120000],
+        )
+        # Time inside detect_upload from function entry to .remote() call (file.read overhead).
+        self._ingress_to_remote_hist = Histogram(
+            "od_ingress_to_remote_ms",
+            description="Time from detect_upload entry to .remote() call: file.read + any APIIngress processing (ms)",
+            boundaries=[0.5, 1, 2, 5, 10, 25, 50],
         )
 
     def _encode_jpeg(self, image) -> bytes:
@@ -57,17 +72,29 @@ class APIIngress:
         responses={200: {"content": {"image/jpeg": {}}}},
         response_class=Response,
     )
-    async def detect_upload(self, file: UploadFile = File(...)):
+    async def detect_upload(self, request: Request, file: UploadFile = File(...)):
+        t_entry = time.perf_counter()
+
+        # Measure Queue 2: how long the request sat in the Ray Serve proxy
+        # before this function was called. k6 stamps X-Send-Time (ms since epoch).
+        x_send_time = request.headers.get("X-Send-Time")
+        if x_send_time:
+            try:
+                proxy_queue_ms = (time.time() * 1000) - float(x_send_time)
+                self._proxy_queue_hist.observe(max(0.0, proxy_queue_ms))
+            except (ValueError, TypeError):
+                pass
+
         image_bytes = await file.read()
         t0 = time.perf_counter()
         image = await self.handle.detect_bytes.remote(image_bytes)
         t1 = time.perf_counter()
         content = await self.loop.run_in_executor(None, self._encode_jpeg, image)
         t2 = time.perf_counter()
-        roundtrip_ms = (t1 - t0) * 1000
-        encode_ms = (t2 - t1) * 1000
-        self._handle_roundtrip_hist.observe(roundtrip_ms)
-        self._jpeg_encode_hist.observe(encode_ms)
+
+        self._ingress_to_remote_hist.observe((t0 - t_entry) * 1000)
+        self._handle_roundtrip_hist.observe((t1 - t0) * 1000)
+        self._jpeg_encode_hist.observe((t2 - t1) * 1000)
         return Response(content=content, media_type="image/jpeg")
 
 
