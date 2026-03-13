@@ -104,11 +104,13 @@ spec:
           name: http
         env:
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: "admin"          # Change or use a Secret in production
+          value: "admin"
         - name: GF_AUTH_ANONYMOUS_ENABLED
           value: "true"
         - name: GF_AUTH_ANONYMOUS_ORG_ROLE
           value: "Viewer"
+        - name: GF_PLUGINS_DISABLE_PLUGINS
+          value: "grafana-image-renderer"
         volumeMounts:
         - name: grafana-data
           mountPath: /var/lib/grafana
@@ -120,11 +122,11 @@ spec:
           mountPath: /var/lib/grafana/dashboards
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
 
       volumes:
       - name: grafana-data

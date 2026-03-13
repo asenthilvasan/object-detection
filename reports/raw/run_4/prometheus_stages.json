@@ -1,0 +1,1757 @@
+{
+  "5": {
+    "midpoint_unix": 1773120318,
+    "gpu_query_unix": 1773120378,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120318,
+                "15.178571428571427"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 15.178571428571427,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120318,
+                "0.25"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.25,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120318,
+                "37.83783783783784"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 37.83783783783784,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120318,
+                "3.202247191011236"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 3.202247191011236,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120318,
+                "12.610619469026549"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 12.610619469026549,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120318,
+                "7.522123893805309"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 7.522123893805309,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120378,
+                "3.9145080345699044"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 3.9145080345699044
+    }
+  },
+  "10": {
+    "midpoint_unix": 1773120588,
+    "gpu_query_unix": 1773120648,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120588,
+                "15"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 15.0,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120588,
+                "0.25"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.25,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120588,
+                "37.89592760180996"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 37.89592760180996,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120588,
+                "2.579185520361991"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 2.579185520361991,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120588,
+                "12.555066079295155"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 12.555066079295155,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120588,
+                "7.51101321585903"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 7.51101321585903,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120648,
+                "7.983642070301634"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 7.983642070301634
+    }
+  },
+  "20": {
+    "midpoint_unix": 1773120858,
+    "gpu_query_unix": 1773120918,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120858,
+                "15.021929824561404"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 15.021929824561404,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120858,
+                "0.25389755011135856"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.25389755011135856,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120858,
+                "37.95454545454545"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 37.95454545454545,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773120858,
+                "2.733812949640288"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 2.733812949640288,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120858,
+                "12.527472527472527"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 12.527472527472527,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120858,
+                "7.5054945054945055"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 7.5054945054945055,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773120918,
+                "15.347849253182284"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 15.347849253182284
+    }
+  },
+  "30": {
+    "midpoint_unix": 1773121128,
+    "gpu_query_unix": 1773121188,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121128,
+                "15.193164933135215"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 15.193164933135215,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121128,
+                "0.2514705882352941"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.2514705882352941,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121128,
+                "38.27639751552795"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 38.27639751552795,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121128,
+                "2.7850162866449506"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 2.7850162866449506,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121128,
+                "12.593144560357675"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 12.593144560357675,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121128,
+                "7.518628912071534"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 7.518628912071534,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121188,
+                "23.33166123204075"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 23.33166123204075
+    }
+  },
+  "40": {
+    "midpoint_unix": 1773121398,
+    "gpu_query_unix": 1773121458,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121398,
+                "15.032894736842106"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 15.032894736842106,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121398,
+                "0.261768082663605"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.261768082663605,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121398,
+                "45.176991150442475"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 45.176991150442475,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121398,
+                "2.87515762925599"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 2.87515762925599,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121398,
+                "12.569137168141594"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 12.569137168141594,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121398,
+                "7.530623608017818"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 7.530623608017818,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121458,
+                "32.09756412563088"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 32.09756412563088
+    }
+  },
+  "50": {
+    "midpoint_unix": 1773121668,
+    "gpu_query_unix": 1773121728,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121668,
+                "696.629213483146"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 696.629213483146,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121668,
+                "0.28725961538461536"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.28725961538461536,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121668,
+                "3166.240409207161"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 3166.240409207161,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121668,
+                "3.588588588588588"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 3.588588588588588,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121668,
+                "20.698529411764707"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 20.698529411764707,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121668,
+                "10.030241935483872"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 10.030241935483872,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121728,
+                "35.79015588334572"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 35.79015588334572
+    }
+  },
+  "60": {
+    "midpoint_unix": 1773121938,
+    "gpu_query_unix": 1773121998,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121938,
+                "920.1807228915661"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 920.1807228915661,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121938,
+                "0.28698553948832034"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.28698553948832034,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121938,
+                "2979.11227154047"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 2979.11227154047,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773121938,
+                "3.6909871244635193"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 3.6909871244635193,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121938,
+                "21.71875"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 21.71875,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121938,
+                "10.307377049180326"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 10.307377049180326,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773121998,
+                "42.09897090696682"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 42.09897090696682
+    }
+  },
+  "80": {
+    "midpoint_unix": 1773122208,
+    "gpu_query_unix": 1773122268,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122208,
+                "1887.9999999999998"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 1887.9999999999998,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122208,
+                "0.2994152046783626"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.2994152046783626,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122208,
+                "3040.816326530612"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 3040.816326530612,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122208,
+                "3.9083969465648853"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 3.9083969465648853,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122208,
+                "28.248898678414097"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 28.248898678414097,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122208,
+                "14.265267175572518"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 14.265267175572518,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122268,
+                "43.825574419204685"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 43.825574419204685
+    }
+  },
+  "100": {
+    "midpoint_unix": 1773122478,
+    "gpu_query_unix": 1773122538,
+    "metrics": {
+      "proxy_queue_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122478,
+                "2894.7368421052633"
+              ]
+            }
+          ]
+        }
+      },
+      "proxy_queue_p50_value": 2894.7368421052633,
+      "ingress_to_remote_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122478,
+                "0.3093171296296296"
+              ]
+            }
+          ]
+        }
+      },
+      "ingress_to_remote_p50_value": 0.3093171296296296,
+      "handle_roundtrip_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122478,
+                "2588.7218045112777"
+              ]
+            }
+          ]
+        }
+      },
+      "handle_roundtrip_p50_value": 2588.7218045112777,
+      "jpeg_encode_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "6fd09cb6012dc046d8ec685bb6c1b512e6114c2614424b838cbe6e3b",
+                "application": "default",
+                "deployment": "APIIngress",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "wm0seus8"
+              },
+              "value": [
+                1773122478,
+                "4.317447495961227"
+              ]
+            }
+          ]
+        }
+      },
+      "jpeg_encode_p50_value": 4.317447495961227,
+      "inference_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122478,
+                "29.464285714285715"
+              ]
+            }
+          ]
+        }
+      },
+      "inference_p50_value": 29.464285714285715,
+      "postprocess_p50": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122478,
+                "14.56081081081081"
+              ]
+            }
+          ]
+        }
+      },
+      "postprocess_p50_value": 14.56081081081081,
+      "gpu_duty": {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": {
+                "Component": "core_worker",
+                "NodeAddress": "10.244.194.139",
+                "SessionName": "session_2026-03-10_01-07-34_149485_114",
+                "Version": "2.54.0",
+                "WorkerId": "ef109355b4f69231e36304490a525618bac194c1f93b450491b78942",
+                "application": "default",
+                "deployment": "ObjectDetection",
+                "instance": "object-detection.ml-pipelines.svc.cluster.local:8080",
+                "job": "ray",
+                "replica": "ppzh77ir"
+              },
+              "value": [
+                1773122538,
+                "45.430607609233775"
+              ]
+            }
+          ]
+        }
+      },
+      "gpu_duty_value": 45.430607609233775
+    }
+  }
+}

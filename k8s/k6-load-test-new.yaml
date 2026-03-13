@@ -1,6 +1,8 @@
 ---
 # ConfigMap: k6 load test script
-# Sends POST /detect-upload requests with a test JPEG pre-downloaded by an init container.
+# Open-loop (constant-arrival-rate) test: fires a fixed number of requests per
+# second regardless of how fast the server responds. Measures true completion
+# time of all injected requests at each RPS level.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,40 +16,54 @@ data:
     import { Trend, Counter, Rate } from "k6/metrics";
 
     // =========================================================================
-    // CONFIG – stepped constant-arrival-rate scenarios
+    // CONFIG – open-loop (constant-arrival-rate) stepped load test
+    //
+    // k6 fires exactly `rate` requests per second for `duration`, regardless of
+    // server response time. If the server can't keep up, requests queue inside
+    // k6 (VUs wait). No requests are dropped — timeout is 180s and
+    // gracefulStop is 180s so every request completes or explicitly times out.
+    //
+    // Professor requirement: "send N requests per second and measure how long
+    // it takes to complete all of them."
     // =========================================================================
-    const RPS_LIST = [1, 5, 10, 20, 30, 40, 50, 60];
-    const DURATION = "30s";          // per stage
-    const TIME_UNIT = "1s";
-    const PREALLOC_VUS = 400;
-    const MAX_VUS = 400;
-    const GRACEFUL_STOP = "0s";      // hard stop so stages don't bleed
-    const START_GAP_SECONDS = 120;   // cooldown between stages
+    const RPS_LIST = [5, 10, 20, 30, 40, 50, 60, 80, 100];
+    const DURATION = "60s";
+    const COOLDOWN_SECONDS = 210;  // must be >= GRACEFUL_STOP to prevent stage bleed
+    const GRACEFUL_STOP = "180s"; // matches timeout so timed-out requests show as failures
+    // Pre-allocate all VUs at startup — avoids runtime goroutine allocation
+    // overhead that causes CPU-throttle drops at high RPS.
+    // Peak in-flight at 100 RPS: (100-48)*60 = 3,120 requests in-flight at end
+    // of injection. Add 2x safety margin → 7,000 VUs.
+    const PRE_ALLOCATED_VUS = 7000;
+    const MAX_VUS = 7000;
 
     const BASE_URL =
       __ENV.OD_BASE_URL ||
       "http://object-detection.ml-pipelines.svc.cluster.local:8000";
 
     // =========================================================================
-    // Build sequential scenarios
+    // Build sequential scenarios (one per RPS level)
     // =========================================================================
     const scenarios = {};
     RPS_LIST.forEach((rps, i) => {
       scenarios[`rps_${rps}`] = {
         executor: "constant-arrival-rate",
         rate: rps,
-        timeUnit: TIME_UNIT,
+        timeUnit: "1s",
         duration: DURATION,
-        preAllocatedVUs: PREALLOC_VUS,
-        maxVUs: MAX_VUS,
         gracefulStop: GRACEFUL_STOP,
-        startTime: `${i * START_GAP_SECONDS}s`,
+        preAllocatedVUs: PRE_ALLOCATED_VUS,
+        maxVUs: MAX_VUS,
+        startTime: `${i * (parseDurationSeconds(DURATION) + COOLDOWN_SECONDS)}s`,
       };
     });
-    export const options = { scenarios };
+    export const options = {
+      scenarios,
+      summaryTrendStats: ["p(50)", "p(90)", "p(95)", "p(99)", "avg", "min", "max"],
+    };
 
     // =========================================================================
-    // Per-RPS custom metrics
+    // Per-stage custom metrics
     // =========================================================================
     const dur = {}, done = {}, ok = {};
     for (const rps of RPS_LIST) {
@@ -57,24 +73,29 @@ data:
     }
 
     // =========================================================================
-    // Load test image from disk (pre-downloaded by init container)
+    // Load test images from disk (pre-downloaded by init container)
     // =========================================================================
-    const imageBytes = open("/data/test_image.jpg", "b");
+    const images = [
+      open("/data/image0.jpg", "b"),
+      open("/data/image1.jpg", "b"),
+    ];
 
     // =========================================================================
-    // Test function – one HTTP POST per iteration
+    // Test function – one HTTP POST per iteration (open-loop: k6 controls rate)
     // =========================================================================
     export default () => {
       const t0 = Date.now();
       let success = false;
 
       try {
+        const img = images[Math.floor(Math.random() * images.length)];
         const payload = {
-          file: http.file(imageBytes, "test.jpg", "image/jpeg"),
+          file: http.file(img, "test.jpg", "image/jpeg"),
         };
 
         const res = http.post(`${BASE_URL}/detect-upload`, payload, {
-          timeout: "30s",
+          timeout: "180s",
+          headers: { "X-Send-Time": String(Date.now()) },
         });
 
         success = check(res, {
@@ -114,53 +135,70 @@ data:
     const DURATION_SECS = parseDurationSeconds(DURATION);
 
     // =========================================================================
-    // Summary → CSV (written to /output/ and stdout)
+    // Summary → CSV
     // =========================================================================
     export function handleSummary(data) {
-      let csv = "rps,p95_ms,avg_ms,iterations,ok_count,fail_count,iter_dropped,ok_rate,scheduled,completion_pct\n";
+      // actual_rps = completed/60 is misleading when completions spill past the 60s
+      // injection window (gracefulStop). Use throughput_rps = completed/elapsed and
+      // drain_time_s = max(0, max_ms/1000 - 60) to separate injection throughput
+      // from drain behavior.
+      let csv = "rps_target,throughput_rps,drain_time_s,p50_ms,p90_ms,p95_ms,p99_ms,avg_ms,min_ms,max_ms,completed,dropped,ok_count,fail_count,ok_rate\n";
 
       for (const rps of RPS_LIST) {
         const mDur  = data.metrics[`http_duration_rps_${rps}`];
         const mDone = data.metrics[`http_done_rps_${rps}`];
         const mOk   = data.metrics[`http_ok_rate_rps_${rps}`];
 
+        const p50 = mDur && mDur.values ? mDur.values["p(50)"] : undefined;
+        const p90 = mDur && mDur.values ? mDur.values["p(90)"] : undefined;
         const p95 = mDur && mDur.values ? mDur.values["p(95)"] : undefined;
+        const p99 = mDur && mDur.values ? mDur.values["p(99)"] : undefined;
         const avg = mDur && mDur.values ? mDur.values["avg"] : undefined;
+        const min = mDur && mDur.values ? mDur.values["min"] : undefined;
+        const max = mDur && mDur.values ? mDur.values["max"] : undefined;
 
-        const iterations = (mDone && mDone.values ? (mDone.values.count || mDone.values.sum) : 0) || 0;
-        const okCount    = (mOk && mOk.values ? mOk.values.passes : 0) || 0;
-        const failCount  = (mOk && mOk.values && mOk.values.fails !== undefined) ? mOk.values.fails : Math.max(0, iterations - okCount);
-        const okRate     = (mOk && mOk.values && mOk.values.rate !== undefined) ? mOk.values.rate : (iterations ? okCount / iterations : 0);
+        const completed = (mDone && mDone.values ? (mDone.values.count || mDone.values.sum) : 0) || 0;
+        const okCount   = (mOk && mOk.values ? mOk.values.passes : 0) || 0;
+        const failCount = (mOk && mOk.values && mOk.values.fails !== undefined) ? mOk.values.fails : Math.max(0, completed - okCount);
+        const okRate    = (mOk && mOk.values && mOk.values.rate !== undefined) ? mOk.values.rate : (completed ? okCount / completed : 0);
 
-        const scheduled   = rps * DURATION_SECS;
-        const iterDropped = Math.max(0, scheduled - iterations);
-        const completion  = scheduled ? (iterations / scheduled) : 0;
+        // throughput_rps: completions per second of actual elapsed time (injection + drain).
+        // More honest than completed/60 when gracefulStop completions are included.
+        const elapsedS      = max !== undefined ? Math.max(max / 1000, DURATION_SECS) : DURATION_SECS;
+        const throughputRps = elapsedS > 0 ? completed / elapsedS : 0;
+        // drain_time_s: how long after the 60s injection window the last request took.
+        // 0 = all completed within injection; >0 = queue was still draining.
+        const drainTimeS    = max !== undefined ? Math.max(0, max / 1000 - DURATION_SECS) : 0;
+        // dropped = iterations k6 could not start due to VU exhaustion (not server failures)
+        const dropped       = Math.max(0, rps * DURATION_SECS - completed);
 
         csv += [
           rps,
+          throughputRps.toFixed(2),
+          drainTimeS.toFixed(1),
+          p50 !== undefined ? p50.toFixed(2) : "",
+          p90 !== undefined ? p90.toFixed(2) : "",
           p95 !== undefined ? p95.toFixed(2) : "",
+          p99 !== undefined ? p99.toFixed(2) : "",
           avg !== undefined ? avg.toFixed(2) : "",
-          iterations,
+          min !== undefined ? min.toFixed(2) : "",
+          max !== undefined ? max.toFixed(2) : "",
+          completed,
+          dropped,
           okCount,
           failCount,
-          iterDropped,
           okRate.toFixed(4),
-          scheduled,
-          (completion * 100).toFixed(1),
         ].join(",") + "\n";
       }
 
       return {
-        "/output/p95_by_rps.csv": csv,
+        "/output/results.csv": csv,
         stdout: csv,
       };
     }
 
 ---
 # Job: runs k6 as a one-shot Kubernetes Job.
-# Pin to the same node as the server for minimal network variance (same pattern
-# as the existing same-node-testing runbook).  Remove nodeSelector if you want
-# the scheduler to place it freely.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -169,7 +207,6 @@ metadata:
   labels:
     app: k6-load-test
 spec:
-  # Set to 0 to prevent automatic retries on failure
   backoffLimit: 0
   template:
     metadata:
@@ -177,15 +214,21 @@ spec:
         app: k6-load-test
     spec:
       restartPolicy: Never
-      # Optional: pin to the same node as the object-detection pod.
-      # Replace the hostname value or remove this block to let k8s schedule freely.
-      # nodeSelector:
-      #   kubernetes.io/hostname: rci-tide-gpu-01.sdsu.edu
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: object-detection
+              topologyKey: kubernetes.io/hostname
       initContainers:
       - name: download-image
         image: curlimages/curl:8.5.0
-        command: ["curl", "-fsSL", "-o", "/data/test_image.jpg",
-                  "https://ultralytics.com/images/bus.jpg"]
+        command: ["/bin/sh", "-c",
+          "curl -fsSL -o /data/image0.jpg https://ultralytics.com/images/bus.jpg &&
+           curl -fsSL -o /data/image1.jpg https://ultralytics.com/images/zidane.jpg"]
         volumeMounts:
         - name: test-data
           mountPath: /data
@@ -216,11 +259,11 @@ spec:
           mountPath: /output
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "1"
+            memory: "4Gi"
+            cpu: "4"
           limits:
-            memory: "1Gi"
-            cpu: "1200m"
+            memory: "8Gi"
+            cpu: "8"
       volumes:
       - name: scripts
         configMap:

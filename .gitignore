@@ -8,3 +8,6 @@ prometheus-3.9.1.darwin-arm64
 data
 prometheus-3.9.1.darwin-arm64.tar.gz
 memory
+reports/METRICS_SPEC.md
+.claude
+.vscode

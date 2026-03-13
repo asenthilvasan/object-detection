@@ -23,6 +23,15 @@ spec:
       - key: "nautilus.io/issue"
         operator: "Exists"
         effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.product
+                operator: In
+                values:
+                - NVIDIA-GeForce-RTX-2080-Ti
       containers:
       - name: object-detection
         image: alexanderlio/object-detection:latest
@@ -36,15 +45,18 @@ spec:
           name: ray-metrics
         resources:
           requests:
-            memory: "8Gi"
-            cpu: "2"
-          limits:
             memory: "16Gi"
             cpu: "8"
-            nvidia.com/gpu: 1  # Request 1 GPU
+          limits:
+            memory: "32Gi"
+            cpu: "16"
+            nvidia.com/gpu: 1
         env:
         - name: RAY_METRICS_REPORT_INTERVAL_MS
-          value: "1000"  # Ray samples GPU every 1s (default 10s) — required for trustworthy GPU graphs
+          value: "1000"  # Ray samples GPU every 1s (default 10s) 
+        volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
         readinessProbe:
           httpGet:
             path: /-/routes
@@ -53,6 +65,11 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 10
           failureThreshold: 6
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 10Gi
 ---
 apiVersion: v1
 kind: Service
